@@ -4,6 +4,7 @@ import { authRouter } from './routes/auth';
 import { usersRouter } from './routes/users';
 import { leadsRouter } from './routes/leads';
 import { dealsRouter } from './routes/deals';
+import { opportunitiesRouter } from './routes/opportunities';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 /** Build and configure the Express application (no network listening). */
@@ -20,6 +21,7 @@ export function createApp(): Application {
   app.use('/api/users', usersRouter);
   app.use('/api/leads', leadsRouter);
   app.use('/api/deals', dealsRouter);
+  app.use('/api/opportunities', opportunitiesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

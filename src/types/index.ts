@@ -69,6 +69,17 @@ export interface Deal {
   created_at: Date;
 }
 
+export interface Opportunity {
+  id: string;
+  tenant_id: string;
+  owner_id: string;
+  name: string;
+  account_name: string;
+  stage: string;
+  estimated_revenue: string;
+  created_at: Date;
+}
+
 export interface JwtPayloadShape {
   userId: string;
   tenantId: string;

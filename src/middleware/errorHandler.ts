@@ -24,6 +24,11 @@ export function errorHandler(
     res.status(err.status).json({ error: err.message });
     return;
   }
+  // multer surfaces upload problems (e.g. file too large) as MulterError.
+  if (typeof err === 'object' && err !== null && (err as { name?: string }).name === 'MulterError') {
+    res.status(400).json({ error: `Upload error: ${(err as Error).message}` });
+    return;
+  }
   // eslint-disable-next-line no-console
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
