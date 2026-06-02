@@ -78,7 +78,7 @@ it owns. This is layered on top of RLS (tenant) for defense in depth.
 | POST   | `/api/users`          | ADMIN       | Provision a user in tenant             |
 | GET/POST/PUT/DELETE | `/api/leads`[ /:id ] | any role | owner-scoped for SALES_REP        |
 | GET/POST/PUT/DELETE | `/api/deals`[ /:id ] | any role | owner-scoped for SALES_REP        |
-| GET    | `/api/opportunities`         | any role | owner-scoped for SALES_REP        |
+| GET/POST/PUT/DELETE | `/api/opportunities`[ /:id ] | any role | owner-scoped for SALES_REP   |
 | POST   | `/api/opportunities/import`  | any role | bulk import from .xlsx/.csv       |
 
 JWT payload: `{ userId, tenantId, role }`.
