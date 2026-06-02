@@ -78,8 +78,26 @@ it owns. This is layered on top of RLS (tenant) for defense in depth.
 | POST   | `/api/users`          | ADMIN       | Provision a user in tenant             |
 | GET/POST/PUT/DELETE | `/api/leads`[ /:id ] | any role | owner-scoped for SALES_REP        |
 | GET/POST/PUT/DELETE | `/api/deals`[ /:id ] | any role | owner-scoped for SALES_REP        |
+| GET    | `/api/opportunities`         | any role | owner-scoped for SALES_REP        |
+| POST   | `/api/opportunities/import`  | any role | bulk import from .xlsx/.csv       |
 
 JWT payload: `{ userId, tenantId, role }`.
+
+## Bulk import engine
+
+`POST /api/opportunities/import` accepts a multipart upload (field `file`,
+`.xlsx` or `.csv`). It:
+
+1. parses the sheet with `xlsx` into a structured array;
+2. validates the mandatory columns — `Opportunity Name`, `Account Name`,
+   `Stage`, `Estimated Revenue` — and every cell (revenue must be numeric;
+   `$1,250.50` style formatting is tolerated);
+3. on **any** failure, aborts the whole import and returns `422` with a targeted
+   error report (`{ row, column, value, message }`) — nothing is written;
+4. injects the caller's `tenant_id` / `owner_id` from the JWT into every row;
+5. performs a single set-based `unnest(...)` bulk insert **inside
+   `executeTenantQuery`**, so the entire batch runs in one RLS-scoped
+   transaction and rolls back atomically on error.
 
 ## Setup
 
