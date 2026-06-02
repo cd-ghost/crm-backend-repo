@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: crm
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Migrations run as the superuser; the app/tests connect as the restricted
+      # crm_app role created by the migration so RLS is actually enforced.
+      MIGRATION_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/crm
+      DATABASE_URL: postgresql://crm_app:crm_app_pw@localhost:5432/crm
+      JWT_SECRET: ci-test-secret
+      JWT_EXPIRES_IN: 1h
+      BCRYPT_SALT_ROUNDS: '10'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run database migrations
+        run: npm run migrate
+
+      - name: TypeScript build
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
